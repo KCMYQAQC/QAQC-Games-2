@@ -524,14 +524,14 @@ function spawnItem() {
   const pool = isCompliant ? COMPLIANT : NON_COMPLIANT;
   const scenario = pool[Math.floor(Math.random() * pool.length)];
 
-  const w = 64;
+  const w = 110;
   const x = Math.random() * (W - w - 20) + 10;
 
   items.push({
     x: x,
-    y: -60,
+    y: -90,
     w: w,
-    h: 64,
+    h: 90,
     compliant: isCompliant,
     label: scenario.label,
     icon: scenario.icon,
@@ -701,14 +701,14 @@ function draw() {
     ctx.shadowBlur = 0;
 
     // Icon
-    ctx.font = '28px serif';
+    ctx.font = '36px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#333';
-    ctx.fillText(item.icon, cx, cy - 8);
+    ctx.fillText(item.icon, cx, cy - 14);
 
     // Label — same dark color for all
-    ctx.font = 'bold 9px Segoe UI, Arial';
+    ctx.font = 'bold 13px Segoe UI, Arial';
     ctx.fillStyle = '#3e2723';
     const words = item.label.split(' ');
     let line1 = '', line2 = '';
@@ -719,8 +719,8 @@ function draw() {
       line1 = words.slice(0, mid).join(' ');
       line2 = words.slice(mid).join(' ');
     }
-    ctx.fillText(line1, cx, cy + 14);
-    if (line2) ctx.fillText(line2, cx, cy + 25);
+    ctx.fillText(line1, cx, cy + 16);
+    if (line2) ctx.fillText(line2, cx, cy + 32);
 
     ctx.restore();
   });
