@@ -701,26 +701,58 @@ function draw() {
     ctx.shadowBlur = 0;
 
     // Icon
-    ctx.font = '36px serif';
+    ctx.font = '28px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#333';
     ctx.fillText(item.icon, cx, cy - 14);
 
-    // Label — same dark color for all
-    ctx.font = 'bold 13px Segoe UI, Arial';
+    // Label — auto-wrap to fit card width
+    const maxTextWidth = item.w - 10;
+    const fontSize = 14;
+    ctx.font = 'bold ' + fontSize + 'px Segoe UI, Arial';
     ctx.fillStyle = '#3e2723';
+    ctx.textAlign = 'center';
+
     const words = item.label.split(' ');
-    let line1 = '', line2 = '';
-    if (words.length <= 2) {
-      line1 = item.label;
-    } else {
-      const mid = Math.ceil(words.length / 2);
-      line1 = words.slice(0, mid).join(' ');
-      line2 = words.slice(mid).join(' ');
+    const lines = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const testLine = currentLine ? currentLine + ' ' + word : word;
+      if (ctx.measureText(testLine).width > maxTextWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
     }
-    ctx.fillText(line1, cx, cy + 16);
-    if (line2) ctx.fillText(line2, cx, cy + 32);
+    if (currentLine) lines.push(currentLine);
+
+    // Shrink font if more than 3 lines needed
+    let usedSize = fontSize;
+    while (lines.length > 3 && usedSize > 9) {
+      usedSize--;
+      ctx.font = 'bold ' + usedSize + 'px Segoe UI, Arial';
+      lines.length = 0;
+      currentLine = '';
+      for (const word of words) {
+        const testLine = currentLine ? currentLine + ' ' + word : word;
+        if (ctx.measureText(testLine).width > maxTextWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+    }
+
+    const lineHeight = usedSize + 3;
+    const textStartY = cy + 10 - ((lines.length - 1) * lineHeight) / 2;
+    lines.forEach((line, i) => {
+      ctx.fillText(line, cx, textStartY + i * lineHeight);
+    });
 
     ctx.restore();
   });
