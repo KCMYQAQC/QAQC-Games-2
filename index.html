@@ -1017,7 +1017,10 @@ resizeGame();
 // Initial draw
 draw();
 
-// Submit score via auto-email using FormSubmit
+// Google Sheets endpoint (Apps Script Web App URL)
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbySejmUy5EWUTzTCXsLLQNvTn8rp5sQVhmwwVNXdE5pzRY-d7eR4BhgOqJl4fhqo5qItg/exec';
+
+// Submit score to Google Sheets
 function submitScore() {
   const nameInput = document.getElementById('playerName');
   const name = nameInput.value.trim();
@@ -1040,62 +1043,41 @@ function submitScore() {
   const title = document.getElementById('endTitle').textContent;
   const date = new Date().toLocaleString();
 
-  // Create a hidden form and submit via FormSubmit.co
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = 'https://formsubmit.co/syafiqah.khairi@kopikenangan.com';
-  form.target = '_blank';
+  console.log('Submitting score to Google Sheets...');
 
-  const fields = {
-    'Player Name': name,
-    'Game': 'Compliance Catch',
-    'Date': date,
-    'Final Score': finalScore,
-    'Rating': title,
-    'Compliance Caught': caught,
-    'Compliance Missed': missed,
-    'Wrong Catches': wrong
-  };
-
-  for (const [key, value] of Object.entries(fields)) {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = key;
-    input.value = value;
-    form.appendChild(input);
-  }
-
-  // FormSubmit config
-  const subjectInput = document.createElement('input');
-  subjectInput.type = 'hidden';
-  subjectInput.name = '_subject';
-  subjectInput.value = 'Compliance Catch Score - ' + name + ' (' + finalScore + ' pts)';
-  form.appendChild(subjectInput);
-
-  const templateInput = document.createElement('input');
-  templateInput.type = 'hidden';
-  templateInput.name = '_template';
-  templateInput.value = 'table';
-  form.appendChild(templateInput);
-
-  const captchaInput = document.createElement('input');
-  captchaInput.type = 'hidden';
-  captchaInput.name = '_captcha';
-  captchaInput.value = 'false';
-  form.appendChild(captchaInput);
-
-  document.body.appendChild(form);
-  form.submit();
-  document.body.removeChild(form);
-
-  // Show confirmation
-  const btn = document.querySelector('.btn-submit');
-  btn.textContent = 'SENT!';
-  btn.style.background = 'linear-gradient(135deg, #69f0ae, #00c853)';
-  setTimeout(() => {
-    btn.textContent = 'SUBMIT SCORE';
-    btn.style.background = '';
-  }, 3000);
+  // Send to Google Sheets
+  fetch(GOOGLE_SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      playerName: name,
+      date: date,
+      score: finalScore,
+      correctAnswers: caught,
+      totalQuestions: '',
+      avgTime: '',
+      gameName: 'Compliance Catch',
+      rating: title,
+      complianceCaught: caught,
+      complianceMissed: missed,
+      wrongCatches: wrong
+    })
+  })
+  .then(() => {
+    console.log('Score saved to Google Sheets!');
+    const btn = document.querySelector('.btn-submit');
+    btn.textContent = 'SAVED!';
+    btn.style.background = 'linear-gradient(135deg, #69f0ae, #00c853)';
+    setTimeout(() => {
+      btn.textContent = 'SUBMIT SCORE';
+      btn.style.background = '';
+    }, 3000);
+  })
+  .catch(err => {
+    console.error('Error:', err);
+    alert('Failed to save score. Please try again.');
+  });
 }
 </script>
 </body>
