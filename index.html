@@ -1017,75 +1017,72 @@ resizeGame();
 // Initial draw
 draw();
 
- // Submit score via auto-email using FormSubmit
-  function submitScore() {
-    // ... all the Formsubmit code ...
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-    // ... confirmation code ...
+// Submit score via auto-email using FormSubmit
+function submitScore() {
+  const nameInput = document.getElementById('playerName');
+  const name = nameInput.value.trim();
+
+  if (!name) {
+    nameInput.style.borderColor = '#ff5252';
+    nameInput.setAttribute('placeholder', 'Please enter your name first!');
+    nameInput.focus();
+    setTimeout(() => {
+      nameInput.style.borderColor = '#ffd700';
+      nameInput.setAttribute('placeholder', 'Enter your name to submit score');
+    }, 2000);
+    return;
   }
 
-  Replace with this:
-  // Google Sheets endpoint (Apps Script Web App URL)
-  const GOOGLE_SHEET_URL = 'https://script.google.com/a/macros/kopikenangan.com/s/AKfycbzdwIPH9vz-cA_PScc6V7L-JMBk_2boGmYg38-oS0g_Ch2
-  XtlINOZh_maMjliYxMf889w/exec';
+  const finalScore = document.getElementById('finalScore').textContent;
+  const caught = document.getElementById('statCaught').textContent;
+  const missed = document.getElementById('statMissed').textContent;
+  const wrong = document.getElementById('statWrong').textContent;
+  const title = document.getElementById('endTitle').textContent;
+  const date = new Date().toLocaleString();
 
-  // Submit score to Google Sheets
-  function submitScore() {
-    const nameInput = document.getElementById('playerName');
-    const name = nameInput.value.trim();
+  const btn = document.querySelector('.btn-submit');
+  const originalText = btn.textContent;
+  btn.textContent = 'SENDING...';
+  btn.style.background = 'linear-gradient(135deg, #ffb300, #ffd700)';
+  btn.disabled = true;
 
-    if (!name) {
-      nameInput.style.borderColor = '#ff5252';
-      nameInput.setAttribute('placeholder', 'Please enter your name first!');
-      nameInput.focus();
-      setTimeout(() => {
-        nameInput.style.borderColor = '#ffd700';
-        nameInput.setAttribute('placeholder', 'Enter your name to submit score');
-      }, 2000);
-      return;
-    }
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
 
-    const finalScore = document.getElementById('finalScore').textContent;
-    const caught = document.getElementById('statCaught').textContent;
-    const missed = document.getElementById('statMissed').textContent;
-    const wrong = document.getElementById('statWrong').textContent;
-    const title = document.getElementById('endTitle').textContent;
-    const date = new Date().toLocaleString();
-
-    console.log('Submitting score to Google Sheets...');
-
-    fetch(GOOGLE_SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        playerName: name,
-        date: date,
-        score: finalScore,
-        correctAnswers: caught,
-        totalQuestions: '',
-        avgTime: '',
-        gameName: 'Compliance Catch',
-        rating: title,
-        complianceCaught: caught,
-        complianceMissed: missed,
-        wrongCatches: wrong
-      })
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      playerName: name,
+      game: 'Compliance Catch',
+      date: date,
+      finalScore: finalScore,
+      rating: title,
+      complianceCaught: caught,
+      complianceMissed: missed,
+      wrongCatches: wrong
     })
-    .then(() => {
-      console.log('Score saved to Google Sheets!');
-      const btn = document.querySelector('.btn-submit');
-      btn.textContent = 'SAVED!';
-      btn.style.background = 'linear-gradient(135deg, #69f0ae, #00c853)';
-      setTimeout(() => {
-        btn.textContent = 'SUBMIT SCORE';
-        btn.style.background = '';
-      }, 3000);
-    })
-    .catch(err => {
-      console.error('Error:', err);
-      alert('Failed to save score. Please try again.');
-    });
-  }
+  })
+  .then(() => {
+    btn.textContent = 'SENT!';
+    btn.style.background = 'linear-gradient(135deg, #69f0ae, #00c853)';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 3000);
+  })
+  .catch(err => {
+    console.error('Submit error:', err);
+    btn.textContent = 'FAILED - TRY AGAIN';
+    btn.style.background = 'linear-gradient(135deg, #ff5252, #c62828)';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 3000);
+  });
+}
+</script>
+</body>
+</html>
